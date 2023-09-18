@@ -310,10 +310,30 @@ private func kInputCallback(inRefCon:UnsafeMutableRawPointer,
   
   guard status == noErr else { return status }
   
-  if let buffer = AVAudioPCMBuffer(pcmFormat: audioMgr.streamFormat, bufferListNoCopy: &bufferList), let captureAudioFrameHandler = audioMgr.capturedFrameHandler {
+  if let buffer = convertAudioBufferListToAVAudioPCMBuffer(audioBufferList: &bufferList, audioFormat: audioMgr.streamFormat,  let captureAudioFrameHandler = audioMgr.capturedFrameHandler {
+  // if let buffer = AVAudioPCMBuffer(pcmFormat: audioMgr.streamFormat, bufferListNoCopy: &bufferList), let captureAudioFrameHandler = audioMgr.capturedFrameHandler {
     captureAudioFrameHandler(buffer)
   }
   return kAudio_ParamError
+}
+
+func convertAudioBufferListToAVAudioPCMBuffer(audioBufferList: UnsafeMutablePointer<AudioBufferList>, audioFormat: AVAudioFormat) -> AVAudioPCMBuffer? {
+    // 创建AVAudioPCMBuffer
+    guard let audioPCMBuffer = AVAudioPCMBuffer(pcmFormat: audioFormat, frameCapacity: AVAudioFrameCount(audioBufferList.pointee.mBuffers.mDataByteSize) / audioFormat.streamDescription.pointee.mBytesPerFrame) else {
+        return nil
+    }
+
+    // 将AudioBufferList的数据复制到AVAudioPCMBuffer
+    for bufferIndex in 0..<Int(audioBufferList.pointee.mNumberBuffers) {
+        let mData = audioBufferList.pointee.mBuffers.mData
+        let mDataByteSize = Int(audioBufferList.pointee.mBuffers.mDataByteSize)
+
+        // 将AudioBuffer中的数据复制到AVAudioPCMBuffer
+        let buffer = UnsafeBufferPointer(start: mData?.assumingMemoryBound(to: Int16.self), count: mDataByteSize / MemoryLayout<Int16>.size)
+        audioPCMBuffer.int16ChannelData?[bufferIndex].initialize(from: buffer.baseAddress!, count: buffer.count)
+    }
+
+    return audioPCMBuffer
 }
 
 private func kRenderCallback(inRefCon:UnsafeMutableRawPointer,

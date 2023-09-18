@@ -7,7 +7,7 @@ let package = Package(
   name: "AECAudioStream",
   platforms: [
     .macOS(.v12),
-    .iOS(.v15),
+    .iOS(.v14),
     .tvOS(.v15)
   ],
   products: [
