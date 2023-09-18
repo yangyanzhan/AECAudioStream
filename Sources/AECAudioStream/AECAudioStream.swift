@@ -310,7 +310,7 @@ private func kInputCallback(inRefCon:UnsafeMutableRawPointer,
   
   guard status == noErr else { return status }
   
-  if let buffer = convertAudioBufferListToAVAudioPCMBuffer(audioBufferList: &bufferList, audioFormat: audioMgr.streamFormat,  let captureAudioFrameHandler = audioMgr.capturedFrameHandler {
+  if let buffer = convertAudioBufferListToAVAudioPCMBuffer(audioBufferList: &bufferList, audioFormat: audioMgr.streamFormat), let captureAudioFrameHandler = audioMgr.capturedFrameHandler {
   // if let buffer = AVAudioPCMBuffer(pcmFormat: audioMgr.streamFormat, bufferListNoCopy: &bufferList), let captureAudioFrameHandler = audioMgr.capturedFrameHandler {
     captureAudioFrameHandler(buffer)
   }
