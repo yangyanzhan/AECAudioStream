@@ -341,7 +341,7 @@ func convertAudioBufferListToAVAudioPCMBuffer(audioBufferList: UnsafeMutablePoin
         // 将AudioBuffer中的数据复制到AVAudioPCMBuffer
         let buffer = UnsafeBufferPointer(start: mData?.assumingMemoryBound(to: Int16.self), count: mDataByteSize / MemoryLayout<Int16>.size)
         audioPCMBuffer.int16ChannelData?[bufferIndex].initialize(from: buffer.baseAddress!, count: buffer.count)
-        audioPCMBuffer.frameLength = (UInt32)buffer.count
+        audioPCMBuffer.frameLength = UInt32(buffer.count)
     }
 
     return audioPCMBuffer
