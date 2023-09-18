@@ -126,7 +126,6 @@ public class AECAudioStream {
     try startGraph()
     try startAudioUnit()
     self.capturedFrameHandler = audioBufferHandler
-    self.running = true
   }
   
   /**
