@@ -117,6 +117,17 @@ public class AECAudioStream {
     try startAudioUnit()
     self.rendererClosure = rendererClosure
   }
+
+  public func startAudioStream(enableAEC: Bool,
+                               audioBufferHandler: @escaping (AVAudioPCMBuffer) -> Void) throws {
+    try createAUGraphForAudioUnit()
+    try configureAudioUnit()
+    try toggleAudioCancellation(enable: enableAEC)
+    try startGraph()
+    try startAudioUnit()
+    self.capturedFrameHandler = audioBufferHandler
+    self.running = true
+  }
   
   /**
    Stops the audio unit and disposes of the audio graph.
