@@ -136,7 +136,10 @@ public class AECAudioStream {
    - Returns: None.
    */
   public func stopAudioUnit() throws {
-    var status = AUGraphStop(graph!)
+      guard let graph = graph else {
+          return
+      }
+    var status = AUGraphStop(graph)
     guard status == noErr else {
       logger.error("AUGraphStop failed")
       throw AECAudioStreamError.osStatusError(status: status)
@@ -146,7 +149,7 @@ public class AECAudioStream {
       logger.error("AudioUnitUninitialize failed")
       throw AECAudioStreamError.osStatusError(status: status)
     }
-    status = DisposeAUGraph(graph!)
+    status = DisposeAUGraph(graph)
     guard status == noErr else {
       logger.error("DisposeAUGraph failed")
       throw AECAudioStreamError.osStatusError(status: status)
