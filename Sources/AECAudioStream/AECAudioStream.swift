@@ -61,7 +61,7 @@ public class AECAudioStream {
     self.rendererClosure = rendererClosure
   }
     
-    var isRecording = false
+    public static var isRecording = false
   
   /**
    Starts an audio stream filter that captures audio data from the system's audio input and applies an acoustic echo cancellation (AEC) filter to it.
@@ -80,7 +80,7 @@ public class AECAudioStream {
                                enableRendererCallback: Bool = false,
                                rendererClosure: ((UnsafeMutablePointer<AudioBufferList>, UInt32) -> Void)? = nil) -> AsyncThrowingStream<AVAudioPCMBuffer, Error> {
     AsyncThrowingStream<AVAudioPCMBuffer, Error> { continuation in
-        if isRecording {
+        if AECAudioStream.isRecording {
             return
         }
       do {
@@ -94,7 +94,7 @@ public class AECAudioStream {
         try toggleAudioCancellation(enable: enableAEC)
         try startGraph()
         try startAudioUnit()
-          isRecording = true
+          AECAudioStream.isRecording = true
       } catch {
         continuation.finish(throwing: error)
       }
@@ -115,7 +115,7 @@ public class AECAudioStream {
   public func startAudioStream(enableAEC: Bool,
                                enableRendererCallback: Bool = false,
                                rendererClosure: ((UnsafeMutablePointer<AudioBufferList>, UInt32) -> Void)? = nil) throws {
-      if isRecording {
+      if AECAudioStream.isRecording {
           return
       }
     self.enableRendererCallback = enableRendererCallback
@@ -125,12 +125,12 @@ public class AECAudioStream {
     try startGraph()
     try startAudioUnit()
     self.rendererClosure = rendererClosure
-      isRecording = true
+      AECAudioStream.isRecording = true
   }
 
   public func startAudioStream(enableAEC: Bool,
                                audioBufferHandler: @escaping (AVAudioPCMBuffer) -> Void) throws {
-      if isRecording {
+      if AECAudioStream.isRecording {
           return
       }
     try createAUGraphForAudioUnit()
@@ -139,7 +139,7 @@ public class AECAudioStream {
     try startGraph()
     try startAudioUnit()
     self.capturedFrameHandler = audioBufferHandler
-      isRecording = true
+      AECAudioStream.isRecording = true
   }
   
   /**
@@ -150,7 +150,7 @@ public class AECAudioStream {
    - Returns: None.
    */
   public func stopAudioUnit() throws {
-      if !isRecording {
+      if !AECAudioStream.isRecording {
           return
       }
       guard let graph = graph else {
@@ -171,7 +171,7 @@ public class AECAudioStream {
       logger.error("DisposeAUGraph failed")
       throw AECAudioStreamError.osStatusError(status: status)
     }
-      isRecording = false
+      AECAudioStream.isRecording = false
   }
   
   private func toggleAudioCancellation(enable: Bool) throws {
@@ -326,8 +326,8 @@ private func kInputCallback(inRefCon:UnsafeMutableRawPointer,
                             inBusNumber:UInt32,
                             inNumberFrames:UInt32,
                             ioData:UnsafeMutablePointer<AudioBufferList>?) -> OSStatus {
-    if !isRecording {
-        return
+    if !AECAudioStream.isRecording {
+        return kAudio_ParamError
     }
   
   let audioMgr = unsafeBitCast(inRefCon, to: AECAudioStream.self)
